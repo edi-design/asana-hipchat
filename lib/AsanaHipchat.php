@@ -167,12 +167,12 @@ class AsanaHipchat
 	 */
 	private function checkExternalLibs()
 	{
-		if (!file_exists('./ext-lib/asana.php'))
+		if (!file_exists(BASE_DIR . '/ext-lib/asana.php'))
 		{
 			throw new Exception('you have to copy https://raw.github.com/ajimix/asana-api-php-class/master/asana.php to ext-lib/asana.php');
 		}
 
-		if (!file_exists('./ext-lib/HipChat.php'))
+		if (!file_exists(BASE_DIR. '/ext-lib/HipChat.php'))
 		{
 			throw new Exception('you have to copy https://raw2.github.com/hipchat/hipchat-php/master/src/HipChat/HipChat.php to ext-lib/HipChat.php');
 		}

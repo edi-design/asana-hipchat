@@ -11,15 +11,16 @@
  * @version 	1.0
  */
 
+define('BASE_DIR', dirname(__FILE__));
 /**
  * install external libraries from followoing urls to ext-lib:
  * $ wget https://raw.github.com/ajimix/asana-api-php-class/master/asana.php
  * $ wget https://raw2.github.com/hipchat/hipchat-php/master/src/HipChat/HipChat.php
  */
-require_once('config/config.php');
-require_once('ext-lib/asana.php');
-require_once('ext-lib/HipChat.php');
-require_once('lib/AsanaHipchat.php');
+require_once(BASE_DIR . '/config/config.php');
+require_once(BASE_DIR . '/ext-lib/asana.php');
+require_once(BASE_DIR . '/ext-lib/HipChat.php');
+require_once(BASE_DIR . '/lib/AsanaHipchat.php');
 
 /**
  * init
