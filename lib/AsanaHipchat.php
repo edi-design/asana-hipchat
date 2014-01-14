@@ -62,7 +62,7 @@ class AsanaHipchat
 			'color' => \HipChat\HipChat::COLOR_YELLOW
 		),
 		'changed_task' => array(
-			'msg' => 'The following task has been changed.<br /><strong>&raquo; %s</strong> (#%s, due on %s, <a href="https://app.asana.com/0/%d">&rarr;</a>)<br />field %s was change from %s to %s.',
+			'msg' => 'The following task has been changed.<br /><strong>&raquo; %s</strong> (#%s, due on %s, <a href="https://app.asana.com/0/%d">&rarr;</a>)<br />field %s was changed from %s to %s.',
 			'color' => \HipChat\HipChat::COLOR_GRAY
 		),
 		'assigned_task' => array(
