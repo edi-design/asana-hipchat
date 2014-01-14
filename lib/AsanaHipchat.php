@@ -447,12 +447,15 @@ class AsanaHipchat
 			$singletaskJson = json_decode($singletask);
 			$taskdata = $singletaskJson->data;
 
-			$creator = htmlentities($taskdata->followers[0]->name, ENT_COMPAT | ENT_HTML401, "UTF-8");
+			$creator = htmlentities($taskdata->followers[0]->name, ENT_COMPAT, "UTF-8");
 
-			$assignee = htmlentities($taskdata->assignee->name, ENT_COMPAT | ENT_HTML401, "UTF-8");
-			if (empty($assignee))
+			$assignee = 'not set';
+			if (!empty($taskdata->assignee))
 			{
-				$assignee = 'not set';
+				if (!empty($taskdata->assignee->name))
+				{
+					$assignee = htmlentities($taskdata->assignee->name, ENT_COMPAT, "UTF-8");
+				}
 			}
 
 			$due_on = $taskdata->due_on;

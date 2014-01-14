@@ -3,7 +3,7 @@ asana-hipchat
 
 Here you'll find a script that pushes changes from an [Asana](https://www.asana.com) workspace to a [HipChat](https://www.hipchat.com) room.
 
-This script was created during our work on [hikewith.me](hikewith.me).
+This script was created during our work on [hikewith.me](http://hikewith.me).
 
 Thanks goes out to [HipChat](https://github.com/hipchat/hipchat-php) and [Ajimix](https://github.com/ajimix/asana-api-php-class) for their libraries.
 
