@@ -157,8 +157,12 @@ class AsanaHipchat
 		// save new data
 		$this->saveData($arr_curr);
 
-		// send messages to hipchat
-		$this->sendMessages();
+		// send first messages during second run to prevent spamming
+		if (count($arr_old) > 0)
+		{
+			// send messages to hipchat
+			$this->sendMessages();
+		}
 	}
 
 	/**
