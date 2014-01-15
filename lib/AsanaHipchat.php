@@ -58,7 +58,7 @@ class AsanaHipchat
 			'color' => \HipChat\HipChat::COLOR_YELLOW
 		),
 		'new_task' => array(
-			'msg' => '<strong>%s</strong> created a new task.<br />&raquo; %s (#%s, due on %s, assigned to %s, <a href="https://app.asana.com/0/%d">&rarr;</a>)',
+			'msg' => '<strong>%s</strong> created a new task.<br />&#9634; %s (#%s, due on %s, assigned to %s, <a href="https://app.asana.com/0/%d">&rarr;</a>)',
 			'color' => \HipChat\HipChat::COLOR_YELLOW
 		),
 		'changed_task' => array(
