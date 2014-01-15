@@ -62,15 +62,15 @@ class AsanaHipchat
 			'color' => \HipChat\HipChat::COLOR_YELLOW
 		),
 		'changed_task' => array(
-			'msg' => 'The following task has been changed.<br /><strong>&raquo; %s</strong> (#%s, due on %s, <a href="https://app.asana.com/0/%d">&rarr;</a>)<br />field %s was changed from %s to %s.',
+			'msg' => 'The following task has been changed.<br /><strong>&#9634; %s</strong> (#%s, due on %s, <a href="https://app.asana.com/0/%d">&rarr;</a>)<br />field %s was changed from %s to %s.',
 			'color' => \HipChat\HipChat::COLOR_GRAY
 		),
 		'assigned_task' => array(
-			'msg' => '@<strong>%s</strong>, the following task has been assigned to you.<br />&raquo; %s (#%s, due on %s, [<a href="https://app.asana.com/0/%d">&rarr;</a>)',
+			'msg' => '@<strong>%s</strong>, the following task has been assigned to you.<br />&#9634; %s (#%s, due on %s, [<a href="https://app.asana.com/0/%d">&rarr;</a>)',
 			'color' => \HipChat\HipChat::COLOR_GREEN
 		),
 		'completed_task' => array(
-			'msg' => 'The following task has been completed.<br /><strong>&diams; %s</strong> (#%s, due on %s, <a href="https://app.asana.com/0/%d">&rarr;</a>)',
+			'msg' => 'The following task has been completed.<br /><strong>&#10003; %s</strong> (#%s, due on %s, <a href="https://app.asana.com/0/%d">&rarr;</a>)',
 			'color' => \HipChat\HipChat::COLOR_GREEN
 		),
 	);
