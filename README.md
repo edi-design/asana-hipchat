@@ -12,12 +12,12 @@ Thanks goes out to [HipChat](https://github.com/hipchat/hipchat-php) and [Ajimix
 * new workspace has been created
 * new project has been created
 * new task has been created
-	* ![new task](http://pic.edi-design.net/github/asana_hipchat/new_task.png)
+	* ![new task](http://pic.edi-design.net/github/asana_hipchat/created_task_v2.png)
 * task changes
 	* assigned
-	*  ![changed task](http://pic.edi-design.net/github/asana_hipchat/changed_task.png)
+	*  ![changed task](http://pic.edi-design.net/github/asana_hipchat/changed_task_v2.png)
 	* completed 
-	* ![completed task](http://pic.edi-design.net/github/asana_hipchat/completed_task.png)
+	* ![completed task](http://pic.edi-design.net/github/asana_hipchat/completed_task_v2.png)
 	* due date changed
 
 ## planed feature
