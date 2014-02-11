@@ -41,4 +41,4 @@ define('HIPCHAT_NOTIFIER', 'Asana');
 /**
  * script configuration
  */
-define('OLD_DATA_FILE', BASE_DIR . '/old_data.json');
+define('SQLITE_DATA_FILE', BASE_DIR . '/db/asana.sqlite');

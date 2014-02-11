@@ -31,7 +31,7 @@ $obj_asana_hipchat->setHipchatApiKey(HIPCHAT_API_KEY);
 $obj_asana_hipchat->setHipchatRoomId(HIPCHAT_API_ROOM);
 $obj_asana_hipchat->setHipchatNotifications(HIPCHAT_NOTIFICATIONS);
 $obj_asana_hipchat->setHipchatNotifier(HIPCHAT_NOTIFIER);
-$obj_asana_hipchat->setOldDataFile(OLD_DATA_FILE);
+$obj_asana_hipchat->setSqliteDataFile(SQLITE_DATA_FILE);
 
 /**
  * run

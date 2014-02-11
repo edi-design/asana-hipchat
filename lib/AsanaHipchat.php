@@ -23,7 +23,7 @@ class AsanaHipchat
 	/*
 	 * script configs
 	 */
-	private $old_data_file = null;
+	private $sqlite_data_file = null;
 
 	/*
 	 * asana config
@@ -43,6 +43,11 @@ class AsanaHipchat
 	 * message container to be sent to hipchat
 	 */
 	private $arr_msg = array();
+
+	/**
+	 * @var PDO
+	 */
+	private $obj_db;
 
 	/**
 	 * array contains pre-formatted messages
@@ -124,11 +129,11 @@ class AsanaHipchat
 	}
 
 	/**
-	 * @param null $old_data_file
+	 * @param null $sqlite_data_file
 	 */
-	public function setOldDataFile($old_data_file)
+	public function setSqliteDataFile($sqlite_data_file)
 	{
-		$this->old_data_file = $old_data_file;
+		$this->sqlite_data_file = $sqlite_data_file;
 	}
 
 	/**
@@ -148,17 +153,22 @@ class AsanaHipchat
 		// get current data
 		$arr_curr = $this->getCurrentData();
 
-		// get old data
-		$arr_old = $this->getOldData();
+		// open sqlite-connection
+		if ($obj_db = new PDO('sqlite:'. $this->sqlite_data_file)) {
+			$this->obj_db = $obj_db;
+		} else {
+			throw new Exception('could not open sqlite database');
+		}
+
+		/** @var PDOStatement $obj_query */
+		$obj_query = $this->obj_db->query('SELECT count(*) FROM `workspace`');
+		$ws_count = $obj_query->fetchColumn();
 
 		// compare data
-		$this->compareData($arr_curr, $arr_old);
-
-		// save new data
-		$this->saveData($arr_curr);
+		$this->compareData($arr_curr);
 
 		// send first messages during second run to prevent spamming
-		if (count($arr_old) > 0)
+		if ($ws_count > 0)
 		{
 			// send messages to hipchat
 			$this->sendMessages();
@@ -193,77 +203,50 @@ class AsanaHipchat
 		}
 	}
 
-
 	/**
-	 * loads old data dump from disk
+	 * start point for comparision
 	 *
-	 * @return array|mixed
+	 * @param $arr_curr
 	 */
-	private function getOldData()
+	private function compareData($arr_curr)
 	{
-		$arr_data = array();
-		if (!file_exists($this->old_data_file))
-		{
-			// no existing data dump
-			return $arr_data;
-		}
-
-		$json = file_get_contents($this->old_data_file);
-		$arr_data = json_decode($json, true);
-
-		return $arr_data;
-	}
-
-	/**
-	 * saves data dump to disk
-	 *
-	 * @param $arr_data
-	 * @throws Exception
-	 * @return false|number of bytes written
-	 */
-	private function saveData($arr_data)
-	{
-		if (!is_writable($this->old_data_file) && !touch($this->old_data_file))
-		{
-			// file is not writable
-			throw new Exception($this->old_data_file . ' has to be writeable');
-		}
-
-		$data = json_encode($arr_data);
-		$return = file_put_contents($this->old_data_file, $data);
-
-		return $return;
-	}
-
-	private function compareData($arr_curr, $arr_old)
-	{
-			$this->checkWorkspaces($arr_curr, $arr_old);
+			$this->checkWorkspaces($arr_curr);
 	}
 
 	/**
 	 * compares workspaces
 	 *
 	 * @param $arr_curr
-	 * @param $arr_old
 	 */
-	private function checkWorkspaces($arr_curr, $arr_old)
+	private function checkWorkspaces($arr_curr)
 	{
 		foreach ($arr_curr as $workspace_id => $workspace)
 		{
-			if (!array_key_exists($workspace_id, $arr_old))
+			/** @var PDOStatement $obj_query */
+			$obj_query = $this->obj_db->query('SELECT `id` FROM `workspace` WHERE `id` = ' . $workspace_id);
+			$id = $obj_query->fetchColumn();
+
+			if ($id == false)
 			{
+				// add workspace to database
+				$obj_stmt = $this->obj_db->prepare("INSERT INTO `workspace` VALUES (:id, :name)");
+				$obj_stmt->bindParam(':id', $workspace_id);
+				$obj_stmt->bindParam(':name', $workspace['name']);
+
+				$obj_stmt->execute();
+
 				// new workspace added
 				$this->arr_msg[] = array(
 					'msg' => sprintf($this->messages['new_workspace']['msg'], $workspace['name'], $workspace_id),
 					'color' => $this->messages['new_workspace']['color']
 				);
 				// mark all data as new
-				$this->checkProjects($workspace['projects'], array());
+				$this->checkProjects($workspace['projects'], false);
 			}
 			else
 			{
 				// compare projects
-				$this->checkProjects($workspace['projects'], $arr_old[$workspace_id]['projects']);
+				$this->checkProjects($workspace['projects'], $workspace_id);
 			}
 		}
 	}
@@ -272,25 +255,42 @@ class AsanaHipchat
 	 * compares projects
 	 *
 	 * @param $arr_curr
-	 * @param $arr_old
+	 * @param $workspace_id
 	 */
-	private function checkProjects($arr_curr, $arr_old)
+	private function checkProjects($arr_curr, $workspace_id)
 	{
 		foreach ($arr_curr as $project_id => $project)
 		{
-			if (!array_key_exists($project_id, $arr_old))
+			$id = false;
+			// worksapce is false if it is set up new
+			if ($workspace_id != false)
 			{
-				// new workspace added
+				/** @var PDOStatement $obj_query */
+				$obj_query = $this->obj_db->query('SELECT `id` FROM `project` WHERE `id` = ' . $project_id);
+				$id = $obj_query->fetchColumn();
+			}
+
+			if ($id == false)
+			{
+				// add project to database
+				$obj_stmt = $this->obj_db->prepare("INSERT INTO `project` VALUES (:id, :workspace_id, :name)");
+				$obj_stmt->bindParam(':id', $project_id);
+				$obj_stmt->bindParam(':workspace_id', $workspace_id);
+				$obj_stmt->bindParam(':name', $project['name']);
+
+				$obj_stmt->execute();
+
+				// new project added
 				$this->arr_msg[] = array(
 					'msg' => sprintf($this->messages['new_project']['msg'], $project['name'], $project_id),
 					'color' => $this->messages['new_project']['color']
 				);
 				// mark all data as new
-				$this->checkTasks($project['name'], $project['tasks'], array());
+				$this->checkTasks($project['name'], $project['tasks'], false);
 			}
 			else
 			{
-				$this->checkTasks($project['name'], $project['tasks'], $arr_old[$project_id]['tasks']);
+				$this->checkTasks($project['name'], $project['tasks'], $project_id);
 			}
 		}
 	}
@@ -300,14 +300,39 @@ class AsanaHipchat
 	 *
 	 * @param $project_name
 	 * @param $arr_curr
-	 * @param $arr_old
+	 * @param $project_id
 	 */
-	private function checkTasks($project_name, $arr_curr, $arr_old)
+	private function checkTasks($project_name, $arr_curr, $project_id)
 	{
 		foreach ($arr_curr as $task_id => $task)
 		{
-			if (!array_key_exists($task_id, $arr_old))
+			$id = false;
+			// worksapce is false if it is set up new
+			if ($project_id != false)
 			{
+				/** @var PDOStatement $obj_query */
+				$obj_query = $this->obj_db->query('SELECT `id` FROM `task` WHERE `id` = ' . $task_id);
+				$id = $obj_query->fetchColumn();
+			}
+
+			if ($id == false)
+			{
+				// add project to database
+				$obj_stmt = $this->obj_db->prepare("INSERT INTO `task` (id, project_id, name, assignee, completed, completed_at, due_on, created_at, modified_at, creator) VALUES (:id, :project_id, :name, :assignee, :completed, :completed_at, :due_on, :created_at, :modified_at, :creator)");
+
+				$obj_stmt->bindParam(':id', $task_id);
+				$obj_stmt->bindParam(':project_id', $project_id);
+				$obj_stmt->bindParam(':name', $task['name']);
+				$obj_stmt->bindParam(':assignee', $task['data']['assignee']);
+				$obj_stmt->bindParam(':completed', $task['data']['completed']);
+				$obj_stmt->bindParam(':completed_at', $task['data']['completed_at']);
+				$obj_stmt->bindParam(':due_on', $task['data']['due_on']);
+				$obj_stmt->bindParam(':created_at', $task['data']['created_at']);
+				$obj_stmt->bindParam(':modified_at', $task['data']['modified_at']);
+				$obj_stmt->bindParam(':creator', $task['data']['creator']);
+
+				$obj_stmt->execute();
+
 				// new task was added, do not compare task content because it is new
 				$this->arr_msg[] = array(
 					'msg' => sprintf($this->messages['new_task']['msg'], $task['data']['creator'], $task['name'], $project_name, $task['data']['due_on'], $task['data']['assignee'], $task_id),
@@ -316,7 +341,7 @@ class AsanaHipchat
 			}
 			else
 			{
-				$this->checkSingleTask($task_id, $task['name'], $task['data'], $arr_old[$task_id]['data']);
+				$this->checkSingleTask($task_id, $task['name'], $task['data']);
 			}
 		}
 	}
@@ -327,13 +352,16 @@ class AsanaHipchat
 	 * @param $task_id
 	 * @param $task_name
 	 * @param $arr_curr
-	 * @param $arr_old
 	 */
-	private function checkSingleTask($task_id, $task_name, $arr_curr, $arr_old)
+	private function checkSingleTask($task_id, $task_name, $arr_curr)
 	{
+		/** @var PDOStatement $obj_query */
+		$obj_query = $this->obj_db->query('SELECT * FROM `task` WHERE `id` = ' . $task_id);
+		$arr_old = $obj_query->fetchAll();
+
 		foreach ($arr_curr as $key => $elem)
 		{
-			if ($elem != $arr_old[$key])
+			if ($elem != $arr_old[0][$key])
 			{
 				switch ($key)
 				{
@@ -359,11 +387,13 @@ class AsanaHipchat
 						}
 					default:
 						$this->arr_msg[] = array(
-							'msg' => sprintf($this->messages['changed_task']['msg'], $task_name, $arr_curr['project_name'], $arr_curr['due_on'], $task_id, $key, $arr_old[$key] ,$elem),
+							'msg' => sprintf($this->messages['changed_task']['msg'], $task_name, $arr_curr['project_name'], $arr_curr['due_on'], $task_id, $key, $arr_old[0][$key] ,$elem),
 							'color' => $this->messages['changed_task']['color']
 						);
 						break;
 				}
+
+				$this->obj_db->exec("UPDATE `task` SET ". $key ." = '". $elem ."' WHERE id = ". $task_id);
 			}
 
 		}
@@ -462,6 +492,17 @@ class AsanaHipchat
 				}
 			}
 
+			$projects = 'not set';
+			if (count($taskdata->projects) > 0)
+			{
+				$projects = '';
+				foreach ($taskdata->projects as $project)
+				{
+					$projects .= $project->name . ', ';
+				}
+				$projects = rtrim($projects, ', ');
+			}
+
 			$due_on = $taskdata->due_on;
 			if (empty($due_on))
 			{
@@ -470,7 +511,7 @@ class AsanaHipchat
 
 			$arr_data = array(
 				'name' => $taskdata->name,
-				'project_name' => $project_name,
+				// 'projects' => $projects,
 				'assignee' => $assignee,
 				'completed' => $taskdata->completed,
 				'completed_at' => $taskdata->completed_at,
