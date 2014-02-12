@@ -418,7 +418,7 @@ class AsanaHipchat
 
 			foreach ($workspacesJson->data as $workspace){
 				$arr_data[(string)$workspace->id] = array(
-					'name' => $workspace->name,
+					'name' => htmlentities($workspace->name, ENT_COMPAT, "UTF-8"),
 					'projects' => array()
 				);
 
@@ -431,7 +431,7 @@ class AsanaHipchat
 
 					foreach ($projectsJson->data as $project){
 						$arr_data[(string)$workspace->id]['projects'][(string)$project->id] = array(
-							'name' => $project->name,
+							'name' => htmlentities($project->name, ENT_COMPAT, "UTF-8"),
 							'tasks' => array()
 						);
 
@@ -441,7 +441,7 @@ class AsanaHipchat
 						if($this->obj_asana->responseCode == "200" && !is_null($tasks)){
 							foreach ($tasksJson->data as $task){
 								$arr_data[(string)$workspace->id]['projects'][(string)$project->id]['tasks'][(string)$task->id] = array(
-									'name' => $task->name,
+									'name' => htmlentities($task->name, ENT_COMPAT, "UTF-8"),
 									'data' => array()
 								);
 
@@ -482,6 +482,7 @@ class AsanaHipchat
 			$taskdata = $singletaskJson->data;
 
 			$creator = htmlentities($taskdata->followers[0]->name, ENT_COMPAT, "UTF-8");
+			$name = htmlentities($taskdata->name, ENT_COMPAT, "UTF-8");
 
 			$assignee = 'not set';
 			if (!empty($taskdata->assignee))
@@ -510,7 +511,7 @@ class AsanaHipchat
 			}
 
 			$arr_data = array(
-				'name' => $taskdata->name,
+				'name' => $name,
 				// 'projects' => $projects,
 				'assignee' => $assignee,
 				'completed' => $taskdata->completed,
