@@ -67,15 +67,15 @@ class AsanaHipchat
 			'color' => \HipChat\HipChat::COLOR_YELLOW
 		),
 		'changed_task' => array(
-			'msg' => 'The following task has been changed.<br /><strong>&#9634; %s</strong> (#%s, due on %s, <a href="https://app.asana.com/0/%d">&rarr;</a>)<br />Field [ %s ] was changed from "%s" to "%s".',
+			'msg' => 'The following task has been changed.<br /><strong>&#9634; %s</strong> (due on %s, <a href="https://app.asana.com/0/%d">&rarr;</a>)<br />Field [ %s ] was changed from "%s" to "%s".',
 			'color' => \HipChat\HipChat::COLOR_GRAY
 		),
 		'assigned_task' => array(
-			'msg' => '@<strong>%s</strong>, the following task has been assigned to you.<br />&#9634; %s (#%s, due on %s, <a href="https://app.asana.com/0/%d">&rarr;</a>)',
+			'msg' => '@<strong>%s</strong>, the following task has been assigned to you.<br />&#9634; %s (due on %s, <a href="https://app.asana.com/0/%d">&rarr;</a>)',
 			'color' => \HipChat\HipChat::COLOR_GREEN
 		),
 		'completed_task' => array(
-			'msg' => 'The following task has been completed.<br /><strong>&#10003; %s</strong> (#%s, due on %s, <a href="https://app.asana.com/0/%d">&rarr;</a>)',
+			'msg' => 'The following task has been completed.<br /><strong>&#10003; %s</strong> (due on %s, <a href="https://app.asana.com/0/%d">&rarr;</a>)',
 			'color' => \HipChat\HipChat::COLOR_GREEN
 		),
 	);
@@ -367,7 +367,7 @@ class AsanaHipchat
 				{
 					case 'completed':
 						$this->arr_msg[] = array(
-							'msg' => sprintf($this->messages['completed_task']['msg'], $task_name, $arr_curr['project_name'], $arr_curr['due_on'], $task_id),
+							'msg' => sprintf($this->messages['completed_task']['msg'], $task_name, $arr_curr['due_on'], $task_id),
 							'color' => $this->messages['completed_task']['color']
 						);
 						break;
@@ -380,14 +380,14 @@ class AsanaHipchat
 						{
 							// only in case a task was assigned, not the assigment revoked
 							$this->arr_msg[] = array(
-								'msg' => sprintf($this->messages['assigned_task']['msg'], $elem, $task_name, $arr_curr['project_name'], $arr_curr['due_on'], $task_id),
+								'msg' => sprintf($this->messages['assigned_task']['msg'], $elem, $task_name, $arr_curr['due_on'], $task_id),
 								'color' => $this->messages['assigned_task']['color']
 							);
 							break;
 						}
 					default:
 						$this->arr_msg[] = array(
-							'msg' => sprintf($this->messages['changed_task']['msg'], $task_name, $arr_curr['project_name'], $arr_curr['due_on'], $task_id, $key, $arr_old[0][$key] ,$elem),
+							'msg' => sprintf($this->messages['changed_task']['msg'], $task_name, $arr_curr['due_on'], $task_id, $key, $arr_old[0][$key] ,$elem),
 							'color' => $this->messages['changed_task']['color']
 						);
 						break;
@@ -417,7 +417,7 @@ class AsanaHipchat
 			$workspacesJson = json_decode($workspaces);
 
 			foreach ($workspacesJson->data as $workspace){
-				$arr_data[$workspace->id] = array(
+				$arr_data[(string)$workspace->id] = array(
 					'name' => $workspace->name,
 					'projects' => array()
 				);
@@ -430,7 +430,7 @@ class AsanaHipchat
 					$projectsJson = json_decode($projects);
 
 					foreach ($projectsJson->data as $project){
-						$arr_data[$workspace->id]['projects'][$project->id] = array(
+						$arr_data[(string)$workspace->id]['projects'][(string)$project->id] = array(
 							'name' => $project->name,
 							'tasks' => array()
 						);
@@ -440,12 +440,12 @@ class AsanaHipchat
 						$tasksJson = json_decode($tasks);
 						if($this->obj_asana->responseCode == "200" && !is_null($tasks)){
 							foreach ($tasksJson->data as $task){
-								$arr_data[$workspace->id]['projects'][$project->id]['tasks'][$task->id] = array(
+								$arr_data[(string)$workspace->id]['projects'][(string)$project->id]['tasks'][(string)$task->id] = array(
 									'name' => $task->name,
 									'data' => array()
 								);
 
-								$this->getTask($project->name, $task->id, $arr_data[$workspace->id]['projects'][$project->id]['tasks'][$task->id]['data']);
+								$this->getTask($project->name, $task->id, $arr_data[(string)$workspace->id]['projects'][(string)$project->id]['tasks'][(string)$task->id]['data']);
 							}
 						} else {
 							echo "Error while trying to connect to Asana, response code: {$this->obj_asana->responseCode}";
