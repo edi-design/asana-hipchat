@@ -29,6 +29,12 @@ Thanks goes out to [HipChat](https://github.com/hipchat/hipchat-php) and [Ajimix
 
 ## installation
 
+### dependencies
+* php5-sqlite
+
+		# apt-get install php5-sqlite
+
+### script installation
 	$ git clone https://github.com/edi-design/asana-hipchat.git asana_hipchat
 	$ cd asana_hipchat/ext-lib
 	$ wget https://raw.github.com/ajimix/asana-api-php-class/master/asana.php
@@ -73,7 +79,7 @@ define('HIPCHAT_NOTIFIER', 'Asana');
 /**
  * script configuration
  */
-define('OLD_DATA_FILE', './old_data.json');
+define('SQLITE_DATA_FILE', BASE_DIR . '/db/asana.sqlite');
 ```
 
 ## run script
