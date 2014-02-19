@@ -29,6 +29,7 @@ class AsanaHipchat
 	 * asana config
 	 */
 	private $asana_api_key = null;
+	private $asana_sleep_interval = 1;
 	private $asana_workspace_id = null;
 
 	/*
@@ -102,6 +103,14 @@ class AsanaHipchat
 	public function setAsanaApiKey($asana_api_key)
 	{
 		$this->asana_api_key = $asana_api_key;
+	}
+
+	/**
+	 * @param int $asana_sleep_interval
+	 */
+	public function setAsanaSleepInterval($asana_sleep_interval)
+	{
+		$this->asana_sleep_interval = $asana_sleep_interval;
 	}
 
 	/**
@@ -524,6 +533,12 @@ class AsanaHipchat
 		} else {
 			throw new Exception('problem getting task: ' . $task_id);
 		}
+
+		/*
+		 * sleep between task calls
+		 * @todo implement request counter, to only sleep if limit could be reached
+		 */
+		sleep($this->asana_sleep_interval);
 	}
 
 }

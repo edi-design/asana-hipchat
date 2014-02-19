@@ -15,6 +15,10 @@
 // api key
 define('ASANA_API_KEY', 'asana_api_key_here');
 
+// asana has a request limit of approximatly 100 repquest per minute,
+// so we have to do a sleep between calls
+define('ASANA_SLEEP_INTERVAL', 1);
+
 // if workspace id is empty, it will check all workspaces
 /**
  * @todo implement this feature
