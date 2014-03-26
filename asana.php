@@ -38,6 +38,7 @@ if (sizeof($grep_array) == 1) {
 	$obj_asana_hipchat->setHipchatNotifications(HIPCHAT_NOTIFICATIONS);
 	$obj_asana_hipchat->setHipchatNotifier(HIPCHAT_NOTIFIER);
 	$obj_asana_hipchat->setSqliteDataFile(SQLITE_DATA_FILE);
+	$obj_asana_hipchat->setAllowedProjects(ALLOWED_PROJECTS);
 
 	/**
 	 * run
