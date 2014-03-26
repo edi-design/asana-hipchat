@@ -25,6 +25,9 @@ define('ASANA_SLEEP_INTERVAL', 1);
  */
 define('ASANA_WORKSPACE_ID', 'asana_workspace_id_here');
 
+// space seperated Asana Project Ids
+// ex. xxx yyy zzz
+define('ALLOWED_PROJECTS', 'asana_project_ids');
 
 /**
  * hipchat configuration
