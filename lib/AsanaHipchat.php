@@ -146,6 +146,16 @@ class AsanaHipchat
 	}
 
 	/**
+	 * @param null $sqlite_data_file
+	 */
+	public function setAllowedProjects($allowed_projects)
+	{
+		if (!is_null($allowed_projects)) {
+			$this->allowed_projects = explode(" ", $allowed_projects);
+		}
+	}
+
+	/**
 	 * main function that calls the apis
 	 * and compare the results.
 	 * if something changed, hipchat will be notified
@@ -437,29 +447,31 @@ class AsanaHipchat
 				// As Asana API documentation says, when response is successful, we receive a 200 in response so...
 				if($this->obj_asana->responseCode == "200" && !is_null($projects)){
 					$projectsJson = json_decode($projects);
-
 					foreach ($projectsJson->data as $project){
-						$arr_data[(string)$workspace->id]['projects'][(string)$project->id] = array(
-							'name' => htmlentities($project->name, ENT_COMPAT, "UTF-8"),
-							'tasks' => array()
-						);
+						if (is_null($this->allowed_projects) || in_array($project->id, $this->allowed_projects)) {
+							$arr_data[(string)$workspace->id]['projects'][(string)$project->id] = array(
+								'name' => htmlentities($project->name, ENT_COMPAT, "UTF-8"),
+								'tasks' => array()
+							);
 
-						// Get all tasks in the current project
-						$tasks = $this->obj_asana->getProjectTasks($project->id);
-						$tasksJson = json_decode($tasks);
-						if($this->obj_asana->responseCode == "200" && !is_null($tasks)){
-							foreach ($tasksJson->data as $task){
-								$arr_data[(string)$workspace->id]['projects'][(string)$project->id]['tasks'][(string)$task->id] = array(
-									'name' => htmlentities($task->name, ENT_COMPAT, "UTF-8"),
-									'data' => array()
-								);
+							// Get all tasks in the current project
+							$tasks = $this->obj_asana->getProjectTasks($project->id);
+							$tasksJson = json_decode($tasks);
+							if($this->obj_asana->responseCode == "200" && !is_null($tasks)){
+								foreach ($tasksJson->data as $task){
+									$arr_data[(string)$workspace->id]['projects'][(string)$project->id]['tasks'][(string)$task->id] = array(
+										'name' => htmlentities($task->name, ENT_COMPAT, "UTF-8"),
+										'data' => array()
+									);
 
-								$this->getTask($project->name, $task->id, $arr_data[(string)$workspace->id]['projects'][(string)$project->id]['tasks'][(string)$task->id]['data']);
+									$this->getTask($project->name, $task->id, $arr_data[(string)$workspace->id]['projects'][(string)$project->id]['tasks'][(string)$task->id]['data']);
+								}
+							} else {
+								echo "Error while trying to connect to Asana, response code: {$this->obj_asana->responseCode}";
 							}
 						} else {
-							echo "Error while trying to connect to Asana, response code: {$this->obj_asana->responseCode}";
+							echo "Ignoring project : {$project->id}";
 						}
-
 					}
 
 				} else {
