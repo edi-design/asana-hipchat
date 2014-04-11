@@ -31,6 +31,7 @@ class AsanaHipchat
 	private $asana_api_key = null;
 	private $asana_sleep_interval = 1;
 	private $asana_workspace_id = null;
+	private $allowed_projects = null;
 
 	/*
 	 * hipchat config
