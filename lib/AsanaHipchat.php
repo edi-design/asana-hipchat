@@ -504,7 +504,7 @@ class AsanaHipchat
 			$taskdata = $singletaskJson->data;
 
 			$creator = htmlentities($taskdata->followers[0]->name, ENT_COMPAT, "UTF-8");
-			$name = htmlentities($taskdata->name, ENT_COMPAT, "UTF-8");
+			$name = htmlentities($taskdata->name, ENT_QUOTES, "UTF-8");
 
 			$assignee = 'not set';
 			if (!empty($taskdata->assignee))
